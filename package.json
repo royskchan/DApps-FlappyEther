@@ -1,0 +1,14 @@
+{
+  "name": "FlappyEther",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "*",
+    "web3": "*",
+    "truffle-contract": "*"
+  }
+}

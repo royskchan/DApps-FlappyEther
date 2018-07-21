@@ -1,0 +1,240 @@
+<html>
+<head>
+<style>
+
+</style>
+</head>
+<body>
+<br>
+<b>Score: </b><b id="score">0</b><br>	
+<canvas id="gameArea" width="400" height="180" style="border:2px solid"></canvas><br>
+<button onMouseDown="ether.jump()" onMouseUp="ether.release()"><b>Jump</b></button>
+<p>Press <b><button onMouseDown="startGame()"><b>Start</b></button></b> to start the game</p>
+<p>Press <b>Jump</b> to keep the Ether don't crash</p>
+<b>Last Score: </b><b id="lastScore">0</b><br>
+<b>Best Score: </b><b id="bestScore">0</b><br><br>
+<b>Message: </b> <font color="blue"><b id="msg"></b></font><br>
+
+<script>
+
+var game = {
+		area : document.getElementById("gameArea"),
+		interval: 0,
+		frame: 0,
+		score: 0,
+   	init : function() {
+        this.ctx = this.area.getContext("2d");
+        this.interval=0;
+        this.frame=0;
+        this.score=0;
+    },
+    clear : function() {
+        this.ctx.clearRect(0, 0, this.area.width, this.area.height);
+    }
+}
+
+var ether;
+var walls;
+
+initGame();
+
+function rand(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function storeScore(score){
+	var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+   		document.getElementById("msg").innerHTML = "Your score is saved in transaction [" + this.responseText + "]";
+    }
+  };
+  xhr.open("GET", "/api/save-score/?score=" + score, true);
+  xhr.send();
+}
+
+
+function loadLastScore(){
+	var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+    	document.getElementById("lastScore").innerHTML = this.responseText;
+    }
+  };
+  xhr.open("GET", "/api/get-last-score", true);
+  xhr.send();
+}
+
+
+function loadBestScore(){
+	var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+    	document.getElementById("bestScore").innerHTML = this.responseText;
+    }
+  };
+  xhr.open("GET", "/api/get-best-score", true);
+  xhr.send();
+}
+
+
+function initGame(){
+	loadLastScore();
+	loadBestScore();
+	
+	clearInterval(game.interval);
+	
+	game.init();
+	
+	ether = new FlappyEther();
+	ether.draw();
+	walls = [];
+	
+	document.getElementById("msg").innerHTML = "";
+}
+
+
+function startGame(){
+	initGame();
+	game.interval = setInterval(updateGame, 20);
+}
+
+
+function stopGame(){
+	clearInterval(game.interval);
+	storeScore(game.score);
+	loadLastScore();
+	loadBestScore();
+}
+
+
+function updateGame(){		
+	game.clear();	
+	
+	if(game.frame%150==0){
+		gap = rand(45, 100);
+		h1 = rand(20, 100);
+		h2 = game.area.height - (h1 + gap);
+		walls.push(new Wall(game.area.width, 0, 12, h1));
+		walls.push(new Wall(game.area.width, h1 + gap, 12, h2));
+	}
+	
+	if(game.frame%10==0){
+		game.score = game.score + 1;
+		document.getElementById("score").innerHTML = game.score;
+	}
+	
+	ether.fall();
+		
+	for (i = 0; i < walls.length; i++) {
+  	walls[i].move();
+  }
+
+	if(ether.isHitBoundary() ){
+		stopGame();
+	}
+	
+	for (i = 0; i < walls.length; i++) {
+  	if(ether.isHitWall(walls[i])){
+  		stopGame();
+  	}
+  }
+  
+	game.frame++;
+}
+
+
+function Wall(x, y, width, height){
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.color = "green";
+	
+	this.draw = function() {
+		ctx = game.ctx;
+		ctx.fillStyle = this.color;
+		ctx.fillRect(this.x , this.y, this.width, this.height)
+	}
+	
+	this.move = function() {
+		this.x = this.x - 1;
+		this.draw();
+	}
+	
+
+}
+
+	
+function FlappyEther(){
+	this.x = 20;
+	this.y = 50;
+	this.width = 20;
+  this.height = 30;
+ 
+  this.speed = 0;
+	this.gravity = 0.04;
+	  
+	this.draw = function() {
+		ctx = game.ctx;
+		
+		ctx.lineWidth = 1;
+    ctx.beginPath();
+		ctx.moveTo(this.x, this.y - this.height/2);
+		ctx.lineTo(this.x + this.width/2, this.y );
+    ctx.lineTo(this.x, this.y + this.height/2);
+    ctx.lineTo(this.x - this.width/2, this.y);
+		ctx.closePath();                             
+
+		var grd=ctx.createLinearGradient(0,0,38,0);
+		grd.addColorStop(0,"black");
+		grd.addColorStop(1,"white");
+		ctx.fillStyle=grd;
+		ctx.fill();
+
+	}
+	
+	this.isHitBoundary = function(){
+		eTop = this.y - this.height/2;
+		eBottom = this.y + this.height/2;
+
+		if(eBottom >= game.area.height || eTop <= 0 ){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	this.isHitWall = function(wall){
+		eLeft = this.x - this.width/2;
+    eRight = this.x + this.width/2;
+    eTop = this.y - this.height/2;
+    eBottom = this.y + this.height/2;
+    
+    wLeft = wall.x;
+    wRight = wall.x + wall.width;
+    wTop = wall.y;
+    wBottom = wall.y + wall.height;
+    
+    return Math.max(eLeft, wLeft) < Math.min(eRight, wRight) &&
+           Math.max(eTop, wTop) < Math.min(eBottom,wBottom);
+	}
+	
+	this.fall = function() {
+		this.speed = this.speed + this.gravity;
+		this.y = this.y + this.speed;
+		this.draw();
+	}	
+	
+	this.jump = function(){
+		this.gravity = -0.16;
+	}
+	
+	this.release = function(){
+		this.gravity = 0.04;
+	}
+}
+	
+</script>
+</body>
+</html>
