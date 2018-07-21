@@ -27,7 +27,7 @@ npm install
 truffle compile
 ```
 ## Run
-Lanuch **ganache-cli** in a separate console first.
+Start **ganache-cli** in a separate console first.
 
 ```
 ganache-cli
@@ -38,7 +38,7 @@ Go to the project folder to deploy the smart contract and run the app
 truffle migrate
 node app.js
 ```
-Then lauch the game at http://localhost:3000 
+Then launch the game at http://localhost:3000 
 
 ## How to play
 Easy, press **Start** to start the game, and use **Jump** button to keep the Ether alive. 
