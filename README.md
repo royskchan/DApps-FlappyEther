@@ -26,7 +26,7 @@ cd DApps-FlappyEther
 npm install
 truffle compile
 ```
-## Run
+## Run The Game
 Start **ganache-cli** in a separate console first.
 
 ```
