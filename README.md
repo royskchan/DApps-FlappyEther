@@ -43,4 +43,4 @@ Then launch the game at http://localhost:3000
 ## How to play
 Easy, press **Start** to start the game, and use **Jump** button to keep the Ether alive. 
 
-Your last score and the best score wiill be saved in blockchain after finished the game every time.
+Your last score and the best score will be saved in blockchain after the game finished every time.
