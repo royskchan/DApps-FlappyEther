@@ -17,7 +17,7 @@ The game is built on **Node** and requires **truffle**  and **ganache-cli** for 
 npm install -g truffle
 npm install -g ganache-cli
 ```
-## Build and Compile Setup
+## Build and Compile Smart Contract
 Clone the source first. Then, install all required **Node** packages and use **truffle** to compile smart contract. 
 
 ```
